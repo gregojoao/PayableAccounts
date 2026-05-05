@@ -34,7 +34,7 @@ namespace DesafioTecnico.Domain.Handlers
         public async Task<ICommandResult> Handle(PayableAccountCreateCommand request, CancellationToken cancellationToken = default)
         {
             request.Validate();
-            if (request.Invalid)
+            if (!request.IsValid)
                 return new CommandResult(false, "Dados incompletos", null, request.Notifications);
 
             var payableAccount = new PayableAccount(request.Name, request.Value, (DateTime)request.DueDate);

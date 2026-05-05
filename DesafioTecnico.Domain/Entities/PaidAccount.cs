@@ -17,6 +17,6 @@ namespace DesafioTecnico.Domain.Entities
         public int DelayedDays { get; private set; }
         public decimal AmountPaid { get; private set; }
         public Guid PayableAccountId { get; private set; }
-        public PayableAccount PayableAccount { get; set; }
+        public PayableAccount? PayableAccount { get; set; }
     }
 }

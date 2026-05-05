@@ -8,15 +8,14 @@ using DesafioTecnico.Domain.Services;
 using DesafioTecnico.Domain.Tests.FakeRepositories;
 using DesafioTecnico.Domain.Tests.FakeTransactions;
 using Flunt.Notifications;
+using FluentAssertions;
 using Xunit;
 
 namespace DesafioTecnico.Domain.Tests.Handlers
 {
     public class PayableAccountHandlerTests
     {
-        private PayableAccountHandler _payableAccountHandler;
-        private PayableAccountCreateCommand _payableAccountCreateValidCommand;
-        private PayableAccountCreateCommand _payableAccountCreateInvalidCommand;
+        private readonly PayableAccountHandler _payableAccountHandler;
 
         public PayableAccountHandlerTests()
         {
@@ -36,33 +35,83 @@ namespace DesafioTecnico.Domain.Tests.Handlers
         [Fact]
         public async Task DadoUmRegistroDeUmaContaAPagarEOPagamentoDestaContaEmDiaORetornoDeveSerQueFoiRegistradaEPaga()
         {
-            _payableAccountCreateValidCommand = new PayableAccountCreateCommand(
+            var command = new PayableAccountCreateCommand(
                 name: "Conta de teste",
                 value: 100m,
                 dueDate: DateTime.Now.Date,
                 payDay: DateTime.Now.Date);
-            var retorno = (CommandResult)await _payableAccountHandler.Handle(_payableAccountCreateValidCommand);
-            Assert.True(retorno.Sucess);
+            var retorno = (CommandResult)await _payableAccountHandler.Handle(command);
+            
+            retorno.Sucess.Should().BeTrue();
+            retorno.Message.Should().Be("Conta a pagar registrada");
         }
 
         [Fact]
         public async Task DadoUmRegistroDeUmaContaAPagarEOPagamentoDestaContaEmAtrasoORetornoDeveSerQueFoiRegistradaEPaga()
         {
-            _payableAccountCreateValidCommand = new PayableAccountCreateCommand(
+            var command = new PayableAccountCreateCommand(
                 name: "Conta de teste",
                 value: 100m,
                 dueDate: DateTime.Now.Date,
                 payDay: DateTime.Now.Date.AddDays(4));
-            var retorno = (CommandResult)await _payableAccountHandler.Handle(_payableAccountCreateValidCommand);
-            Assert.True(retorno.Sucess);
+            var retorno = (CommandResult)await _payableAccountHandler.Handle(command);
+            
+            retorno.Sucess.Should().BeTrue();
+            retorno.Message.Should().Be("Conta a pagar registrada");
         }
 
         [Fact]
         public async Task DadoUmRegistroDeUmaContaAPagarInvalidaORetornoDeveSerQueFoiNaoRegistrada()
         {
-            _payableAccountCreateInvalidCommand = new PayableAccountCreateCommand();
-            var retorno = (CommandResult)await _payableAccountHandler.Handle(_payableAccountCreateInvalidCommand);
-            Assert.True(!retorno.Sucess && ((IList<Notification>)retorno.Notification).Count == 4);
+            var command = new PayableAccountCreateCommand();
+            var retorno = (CommandResult)await _payableAccountHandler.Handle(command);
+            
+            retorno.Sucess.Should().BeFalse();
+            retorno.Message.Should().Be("Dados incompletos");
+            ((IList<Notification>)retorno.Notification).Count.Should().Be(4);
+        }
+
+        [Fact]
+        public async Task DadoUmRegistroComNomeVazioDeveRetornarErro()
+        {
+            var command = new PayableAccountCreateCommand(
+                name: "",
+                value: 100m,
+                dueDate: DateTime.Now.Date,
+                payDay: DateTime.Now.Date);
+            var retorno = (CommandResult)await _payableAccountHandler.Handle(command);
+            
+            retorno.Sucess.Should().BeFalse();
+            retorno.Message.Should().Be("Dados incompletos");
+        }
+
+        [Fact]
+        public async Task DadoUmRegistroComValorZeroDeveRetornarErro()
+        {
+            var command = new PayableAccountCreateCommand(
+                name: "Conta teste",
+                value: 0m,
+                dueDate: DateTime.Now.Date,
+                payDay: DateTime.Now.Date);
+            var retorno = (CommandResult)await _payableAccountHandler.Handle(command);
+            
+            retorno.Sucess.Should().BeFalse();
+            retorno.Message.Should().Be("Dados incompletos");
+        }
+
+        [Fact]
+        public async Task DadoUmRegistroValidoDeveRetornarOsDadosDaContaCriada()
+        {
+            var command = new PayableAccountCreateCommand(
+                name: "Conta de teste",
+                value: 100m,
+                dueDate: DateTime.Now.Date,
+                payDay: DateTime.Now.Date);
+            var retorno = (CommandResult)await _payableAccountHandler.Handle(command);
+            
+            retorno.Sucess.Should().BeTrue();
+            retorno.Entity.Should().NotBeNull();
+            retorno.Entity.Should().BeOfType<PayableAccount>();
         }
     }
 }

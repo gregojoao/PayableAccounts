@@ -5,7 +5,7 @@ namespace DesafioTecnico.Domain.Commands
     public class CommandResult : ICommandResult
     {
         public CommandResult() { }
-        public CommandResult(bool sucess, string message, object entity = null, object notification = null)
+        public CommandResult(bool sucess, string message, object? entity = null, object? notification = null)
         {
             Sucess = sucess;
             Message = message;
@@ -14,8 +14,8 @@ namespace DesafioTecnico.Domain.Commands
         }
 
         public bool Sucess { get; set; }
-        public object Entity { get; set; }
-        public object Notification { get; set; }
-        public string Message { get; set; }
+        public object? Entity { get; set; }
+        public object? Notification { get; set; }
+        public string Message { get; set; } = string.Empty;
     }
 }
