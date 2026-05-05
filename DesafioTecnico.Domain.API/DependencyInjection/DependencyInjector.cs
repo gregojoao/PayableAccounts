@@ -24,7 +24,7 @@ namespace DesafioTecnico.Domain.API.DependencyInjection
 
         private static Task InjectDomain(IServiceCollection services)
         {
-            services.AddMediatR(Assembly.Load("DesafioTecnico.Domain"));
+            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(Assembly.Load("DesafioTecnico.Domain")));
             services.AddTransient<IPayableAccountService, PayableAccountService>();
             return Task.CompletedTask;
         }

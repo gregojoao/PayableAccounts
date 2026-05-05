@@ -6,7 +6,7 @@ using MediatR;
 
 namespace DesafioTecnico.Domain.Commands
 {
-    public class PayableAccountCreateCommand : Notifiable, IRequest<ICommandResult>
+    public class PayableAccountCreateCommand : Notifiable<Notification>, IRequest<ICommandResult>
     {
         public PayableAccountCreateCommand() { }
         public PayableAccountCreateCommand(string name, decimal value, DateTime? dueDate, DateTime? payDay)
@@ -17,7 +17,7 @@ namespace DesafioTecnico.Domain.Commands
             Payday = payDay;
         }
 
-        public string Name { get; set; }
+        public string Name { get; set; } = string.Empty;
         public decimal Value { get; set; }
         public DateTime? DueDate { get; set; }
         public DateTime? Payday { get; set; }
@@ -25,7 +25,7 @@ namespace DesafioTecnico.Domain.Commands
         public void Validate()
         {
             AddNotifications(
-                new Contract()
+                new Contract<Notification>()
                     .Requires()
                     .IsNotNullOrEmpty(Name, "Name", "Nome da conta a pagar não pode estar em branco.")
                     .IsGreaterThan(Value, 0, "Value", "O valor da conta a pagar tem de ser maior que zero.")
